@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* Styles globaux */
+.page-series {
+  @apply min-h-screen bg-bg text-ink font-sans;
+  background-image:
+    radial-gradient(1200px 600px at 10% -10%, rgba(0,173,181,.18), transparent),
+    radial-gradient(900px 500px at 110% 10%, rgba(0,173,181,.12), transparent),
+    url('/images/fond-serie.jpeg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.page-series a {
+  @apply text-inherit no-underline;
+}
+
+/* Panel (container translucide) */
+.panel {
+  @apply bg-panel-alpha border border-white/10 rounded-m shadow-panel p-6 backdrop-blur;
+}
+
+/* Carte série */
+.card-show {
+  @apply relative flex flex-col bg-card border border-white/10 rounded-m overflow-hidden h-full transition;
+}
+.card-show:hover {
+  @apply -translate-y-1.5 shadow-card border-pri/50;
+}
+
+/* Media */
+.card-media {
+  @apply relative bg-black aspect-[2/3];
+}
+.card-media img {
+  @apply w-full h-full object-cover;
+}
+.media-fade {
+  @apply absolute inset-x-0 bottom-0 h-[42%];
+  background: linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0));
+}
+
+/* Caption */
+.card-caption {
+  @apply px-3 py-2 min-h-[64px];
+}
+.card-caption h6 {
+  @apply text-ink font-bold;
+}
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dates {
+  @apply text-ink-weak text-sm mt-1 block;
+}
+
+/* Chips */
+.chip {
+  @apply absolute top-2 px-2 py-1 text-sm font-bold text-white rounded-s border border-white/10 flex items-center gap-1 backdrop-blur;
+  background: rgba(0,0,0,.45);
+}
+.chip-score {
+  @apply left-2 shadow-inner;
+}
+.chip-flag {
+  @apply right-2;
+}
+
+/* Overlay */
+.card-overlay {
+  @apply absolute inset-0 flex flex-col justify-end gap-2 p-3 opacity-0 translate-y-1 pointer-events-none transition;
+  background: linear-gradient(to top, #1b1f24 36%, rgba(0,0,0,.45) 68%, rgba(0,0,0,0) 100%);
+}
+.card-show:hover .card-overlay {
+  @apply opacity-100 translate-y-0 pointer-events-auto;
+}
+.btn-watch {
+  @apply flex items-center justify-center gap-2 bg-pri text-white font-bold rounded-s px-4 py-2 border border-white/20 transition;
+}
+.btn-watch:hover {
+  @apply bg-pri-weak -translate-y-0.5;
+}
+.overlay-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Boutons ronds */
+.icon-circle {
+  @apply w-11 h-11 grid place-items-center bg-white/10 border border-white/20 rounded-full transition;
+}
+.icon-circle:hover {
+  @apply bg-white/20 border-white/30 -translate-y-0.5;
+}
+.icon-circle.is-active {
+  @apply bg-pri/30 border-pri shadow-inner;
+}
+
+/* Overlay synopsis */
+.overlay-synopsis {
+  @apply text-ink text-sm opacity-95 leading-snug overflow-hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Icônes */
+.icon-btn,
+.icon-circle img,
+.btn-icon img,
+.btn-watch img {
+  @apply w-5 h-5 object-contain;
+  filter: brightness(0) invert(1);
+}
