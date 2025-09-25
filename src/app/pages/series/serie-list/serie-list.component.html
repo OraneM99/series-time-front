@@ -1,0 +1,126 @@
+<div class="page-series">
+  <div class="container my-5 p-3">
+    <div class="panel">
+      <!-- Loader -->
+      @if (store.loading()) {
+        <p class="text-center">Chargement en cours...</p>
+      } @else if (store.error()) {
+        <!-- Erreur -->
+        <p class="text-red-400 text-center">{{ store.error() }}</p>
+      } @else {
+        <!-- Résultats -->
+        @if (store.series().length > 0) {
+          <div class="row g-4">
+            @for (serie of store.series(); track serie.id) {
+              <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="card-show">
+                  <!-- Carte principale -->
+                  <a [routerLink]="['/series', serie.id]" class="card-tapzone block">
+                    <div class="card-media">
+                      @if (serie.poster) {
+                        <img
+                          [src]="serie.poster || 'assets/images/placeholder-poster.png'"
+                          [alt]="'Poster de ' + serie.name"
+                          loading="lazy" />
+                      } @else {
+                        <img
+                          src="assets/images/placeholder-poster.png"
+                          alt="Poster indisponible"
+                          loading="lazy" />
+                      }
+
+                      <!-- Chip note -->
+                      <div class="chip chip-score">
+                        <fa-icon icon="star"></fa-icon>
+                        {{ serie.vote ?? 'N/A' }}
+                      </div>
+
+                      <!-- Chip pays -->
+                      <div class="chip chip-flag">
+                        {{ serie.country }}
+                      </div>
+
+                      <div class="media-fade"></div>
+                    </div>
+
+                    <!-- Caption -->
+                    <div class="card-caption">
+                      <h6 class="text-truncate-2">{{ serie.name }}</h6>
+                      <small class="dates">
+                        {{ serie.firstAirDate ?? 'Date inconnue' }}
+                        @if (serie.lastAirDate) {
+                          – {{ serie.lastAirDate }}
+                        }
+                      </small>
+                    </div>
+                  </a>
+
+                  <!-- Overlay -->
+                  <div class="card-overlay">
+                    <!-- En savoir plus -->
+                    <a [routerLink]="['/series', serie.id]" class="btn-watch">
+                      <fa-icon icon="info-circle"></fa-icon>
+                      En savoir plus
+                    </a>
+
+                    <!-- Actions -->
+                    <div class="overlay-actions">
+                      <button class="icon-circle" title="Ajouter aux favoris">
+                        <fa-icon icon="heart"></fa-icon>
+                      </button>
+
+                      <button class="icon-circle" title="Ne plus me proposer">
+                        <fa-icon icon="ban"></fa-icon>
+                      </button>
+
+                      @if (isAdmin) {
+                        <a
+                          [routerLink]="['/series/update', serie.id]"
+                          class="icon-circle"
+                          title="Modifier la série">
+                          <fa-icon icon="edit"></fa-icon>
+                        </a>
+                      }
+                    </div>
+
+                    <!-- Synopsis -->
+                    <p class="overlay-synopsis">
+                      {{ serie.overview ?? 'Synopsis indisponible.' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container text-center mt-4">
+            <pagination-controls
+              (pageChange)="onPageChange($event)"
+              previousLabel="Précédent"
+              nextLabel="Suivant"
+              class="pagination">
+            </pagination-controls>
+          </div>
+
+          <!-- Total -->
+          <p class="mt-4 text-center">
+            Total : {{ store.total() }} séries
+          </p>
+        } @else {
+          <p class="text-center">Aucune série trouvée.</p>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Bouton ajouter (admin uniquement) -->
+  @if (isAdmin) {
+    <a
+      [routerLink]="['/series/create']"
+      class="fixed bottom-7 right-7 w-14 h-14 bg-button text-white flex items-center justify-center rounded-full shadow-lg border border-white/20"
+      title="Ajouter une série">
+      <fa-icon icon="plus"></fa-icon>
+    </a>
+  }
+</div>
