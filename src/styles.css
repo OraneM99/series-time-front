@@ -1,1 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg-main: #222831;
+  --bg-hover: #393e46;
+  --text: #fff;
+  --accent: #00ADB5;
+
+  --danger: #e53935;
+  --success: #4caf50;
+  --warning: #ff9800;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  background: var(--bg-main);
+  color: var(--text);
+}
