@@ -1,0 +1,65 @@
+<!-- Overlay -->
+<div class="sidebar-overlay"
+     [class.active]="isOpen()"
+     (click)="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.open]="isOpen()">
+  <nav class="p-6 space-y-4">
+    <!-- Séries -->
+    <div>
+      <button (click)="toggleSubmenu('series')"
+              class="flex items-center justify-between w-full font-semibold hover:text-button">
+        <span class="flex items-center gap-2">
+          <fa-icon [icon]="['fas','tv']"></fa-icon> Séries
+        </span>
+        <fa-icon [icon]="['fas','chevron-right']"
+                 [class.rotate-90]="activeMenu() === 'series'"
+                 class="transition-transform"></fa-icon>
+      </button>
+
+      @if (activeMenu() === 'series') {
+        <ul class="ml-6 mt-2 space-y-2 text-sm">
+          <li><a routerLink="/series/liste" class="hover:text-button">Liste des séries</a></li>
+          <li><a routerLink="/series/top" class="hover:text-button">Top 250 séries</a></li>
+          <li><a routerLink="/series/popular" class="hover:text-button">Séries populaires</a></li>
+          <li><a routerLink="/series/news" class="hover:text-button">Actualités</a></li>
+        </ul>
+      }
+    </div>
+
+    <!-- Découvrir -->
+    <div>
+      <button (click)="toggleSubmenu('discover')"
+              class="flex items-center justify-between w-full font-semibold hover:text-button">
+        <span class="flex items-center gap-2">
+          <fa-icon [icon]="['fas','lightbulb']"></fa-icon> Découvrir
+        </span>
+        <fa-icon [icon]="['fas','chevron-right']"
+                 [class.rotate-90]="activeMenu() === 'discover'"
+                 class="transition-transform"></fa-icon>
+      </button>
+
+      @if (activeMenu() === 'discover') {
+        <ul class="ml-6 mt-2 space-y-2 text-sm">
+          <li><a routerLink="/discover/what-to-watch" class="hover:text-button">Que regarder</a></li>
+          <li><a routerLink="/discover/trailers" class="hover:text-button">Dernières bandes-annonces</a></li>
+          <li><a routerLink="/discover/following" class="hover:text-button">Vos suivis</a></li>
+        </ul>
+      }
+    </div>
+
+    <!-- Admin -->
+    @if (isAdmin()) {
+      <div>
+        <a routerLink="/admin/stats"
+           class="flex items-center gap-2 font-semibold hover:text-button">
+          <fa-icon [icon]="['fas','chart-line']"></fa-icon> Statistiques
+        </a>
+      </div>
+    }
+  </nav>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</aside>

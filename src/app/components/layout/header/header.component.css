@@ -1,0 +1,278 @@
+/* ===== Navbar ===== */
+.nx-navbar {
+  position: relative;
+  top: 0;
+  z-index: 2000;
+  background: var(--bg-main);
+  color: var(--text);
+}
+
+.nx-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 18px;
+  gap: 1rem;
+}
+
+/* ===== Burger ===== */
+.hamburger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 1.2rem;
+}
+
+/* ===== Logo ===== */
+.nx-logo {
+  margin-left: 70px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ===== Recherche ===== */
+.nx-search {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 600px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0 10px;
+  height: 34px;
+}
+
+.search-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: #111;
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #6b7280;
+}
+
+.search-submit {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: #111;
+}
+
+/* ===== Suggestions ===== */
+.nx-suggest {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  background: var(--bg-main);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  overflow: hidden;
+}
+
+.nx-sg-item {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.nx-sg-item:hover,
+.nx-sg-item.is-active {
+  background: var(--accent);
+  color: #111;
+}
+
+/* ===== Actions droites ===== */
+.nx-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nx-action-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  color: var(--text);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #e53935;
+  color: #fff;
+  border-radius: 999px;
+  font-size: .65rem;
+  padding: 2px 5px;
+  font-weight: 800;
+}
+
+/* ===== Auth / Profil ===== */
+.nx-auth {
+  margin-left: 20px;
+}
+
+.nx-dropdown {
+  position: relative;
+}
+
+.nx-user-btn {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #444;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: .9rem;
+}
+
+.nx-dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 110%;
+  min-width: 220px;
+  background: var(--bg-main);
+  border-radius: 10px;
+  padding: 8px 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  z-index: 100;
+}
+
+.nx-dropdown:hover .nx-dropdown-content {
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.9rem 1.2rem;
+  font-size: .9rem;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+.dropdown-item.danger {
+  color: #e53935;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(255,255,255,.15);
+  margin: 6px 0;
+}
+
+/* Boutons globaux */
+.nx-btn,
+.nx-btn-outline {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem; /* espace horizontal entre boutons */
+}
+
+/* Bouton Connexion */
+.nx-btn {
+  background: var(--text);
+  color: var(--bg-main);
+  border: 2px solid var(--text);
+}
+.nx-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--bg-hover);
+}
+
+/* Bouton Inscription */
+.nx-btn-outline {
+  background: var(--accent);
+  color: var(--bg-main);
+  border: 2px solid var(--accent);
+}
+.nx-btn-outline:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .nx-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* marge verticale entre les deux */
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .nx-btn,
+  .nx-btn-outline {
+    margin-left: 0;       /* supprime la marge horizontale */
+    width: 100%;          /* pleine largeur */
+    text-align: center;
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 920px) {
+  .nx-search { max-width: 100%; }
+  .nx-container { gap: .6rem; }
+  .user-name { display: none; }
+}

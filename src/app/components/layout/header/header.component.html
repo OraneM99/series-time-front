@@ -1,0 +1,102 @@
+<nav class="nx-navbar">
+  <div class="nx-container">
+
+  <!-- Burger -->
+    <button class="hamburger-btn" (click)="sidebarStore.toggleSidebar()">
+      <fa-icon [icon]="['fas','bars']"></fa-icon>
+    </button>
+
+
+    <!-- Logo -->
+    <a routerLink="/home" class="nx-logo">
+      SeriesTime
+    </a>
+
+    <!-- Barre de recherche -->
+    <form class="nx-search" (submit)="$event.preventDefault()">
+      <div class="search-container">
+
+        <input class="search-input"
+               type="text"
+               placeholder="Rechercher..."
+               [value]="searchQuery()"
+               (input)="onSearchChangeEvent($event)"
+               (keydown)="onKeyDown($event)" />
+
+        <button class="search-submit" type="submit">
+          <fa-icon [icon]="['fas','search']"></fa-icon>
+        </button>
+      </div>
+
+      <!-- Suggestions -->
+      @if (showSuggest()) {
+        <div class="nx-suggest">
+          <ul class="nx-suggest-list">
+            @for (item of suggestions(); track item.id; let i = $index) {
+              <li>
+                <a [href]="item.url"
+                   class="nx-sg-item"
+                   [class.is-active]="i === activeIndex()">
+                  <div>
+                    <div class="nx-sg-title">{{ item.title }}</div>
+                    <div class="nx-sg-meta">{{ item.year }} · {{ item.meta }}</div>
+                  </div>
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </form>
+
+    <!-- Actions rapides -->
+    <div class="nx-actions">
+      <button class="nx-action-btn" title="Notifications">
+        <fa-icon [icon]="['fas','clock']"></fa-icon>
+        <span class="notification-badge">3</span>
+      </button>
+      <button class="nx-action-btn" title="Mes favoris">
+        <fa-icon [icon]="['fas','heart']"></fa-icon>
+      </button>
+      <a routerLink="/random" class="nx-action-btn" title="Lecture aléatoire">
+        <fa-icon [icon]="['fas','random']"></fa-icon>
+      </a>
+
+      @if ((user()?.roles ?? []).includes('ROLE_ADMIN')) {
+        <a routerLink="/admin/dashboard" class="nx-action-btn" title="Dashboard">
+          <fa-icon [icon]="['fas','user-shield']"></fa-icon>
+        </a>
+      }
+    </div>
+
+    <!-- Auth -->
+    <div class="nx-auth">
+      @if (user()) {
+        <div class="nx-dropdown">
+          <button class="nx-user-btn">
+            <div class="user-avatar">
+              <fa-icon [icon]="['fas','user']"></fa-icon>
+            </div>
+            <span class="user-name">{{ user()?.username }}</span>
+          </button>
+          <div class="nx-dropdown-content">
+            <a routerLink="/profile" class="dropdown-item">
+              <fa-icon [icon]="['fas','user']"></fa-icon> Mon profil
+            </a>
+            <a routerLink="/profile/edit" class="dropdown-item">
+              <fa-icon [icon]="['fas','gear']"></fa-icon> Paramètres
+            </a>
+            <div class="dropdown-divider"></div>
+            <a (click)="logout()" class="dropdown-item danger">
+              <fa-icon [icon]="['fas','right-from-bracket']"></fa-icon> Se déconnecter
+            </a>
+          </div>
+        </div>
+      } @else {
+        <a routerLink="/login" class="nx-btn">Se connecter</a>
+        <a routerLink="/register" class="nx-btn-outline">S'inscrire</a>
+      }
+    </div>
+
+  </div>
+</nav>
