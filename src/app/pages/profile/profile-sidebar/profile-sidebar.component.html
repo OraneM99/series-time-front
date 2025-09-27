@@ -1,0 +1,29 @@
+<nav class="bg-container text-text p-4 h-full">
+  <div class="text-center mb-6">
+    <h5 class="mt-2 font-bold">{{ user()?.username }}</h5>
+    <p class="text-sm text-gray-400">{{ user()?.email }}</p>
+  </div>
+
+  <hr class="my-4 border-background">
+
+  <h6 class="uppercase text-gray-400 text-xs mb-3">Paramètres utilisateur</h6>
+
+  <ul class="space-y-2 mb-6">
+    <li><a routerLink="/profile" class="block hover:text-button">Mon profil</a></li>
+    <li><a routerLink="/profile/edit" class="block hover:text-button">Modifier mon profil</a></li>
+    <li><a routerLink="/profile/privacy" class="block hover:text-button">Données et confidentialité</a></li>
+    <li><a routerLink="/profile/security" class="block hover:text-button">Sécurité</a></li>
+  </ul>
+
+  @if (isAdmin()) {
+    <h6 class="uppercase text-gray-400 text-xs mb-3">Portail Admin</h6>
+    <ul class="space-y-2 mb-6">
+      <li><a routerLink="/admin/dashboard" class="block hover:text-button">Dashboard</a></li>
+      <li><a routerLink="/admin/users" class="block hover:text-button">Gestion des utilisateurs</a></li>
+    </ul>
+  }
+
+  <ul>
+    <li><a routerLink="/logout" class="block text-red-500 hover:text-red-600">Déconnexion</a></li>
+  </ul>
+</nav>
