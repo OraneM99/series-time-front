@@ -1,0 +1,112 @@
+.auth-card {
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  animation: slideUp 0.6s ease-out;
+}
+
+.auth-icon {
+  width: 4rem;
+  height: 4rem;
+  background-color: rgba(13, 110, 253, 0.2);
+  border: 2px solid #0d6efd;
+}
+.auth-icon img {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Champs avec icônes */
+.input-icon {
+  position: relative;
+}
+.input-icon-left {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Inputs */
+.custom-form-control {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  border-radius: 8px !important;
+}
+.custom-form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.custom-form-control:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+  color: white !important;
+}
+
+/* Bouton */
+.custom-btn {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.custom-btn:hover {
+  background-color: #0b5ed7 !important;
+  border-color: #0a58ca !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+.custom-btn img {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Alertes */
+.custom-alert {
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  border-radius: 8px;
+}
+.alert-danger {
+  border-left: 4px solid #dc3545;
+}
+.alert-success {
+  border-left: 4px solid #198754;
+}
+
+/* Bloc sécurité */
+.security-info {
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.security-info small {
+  color: white !important;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-card {
+    margin: 1rem;
+  }
+  .card-body {
+    padding: 2rem 1.5rem !important;
+  }
+}
