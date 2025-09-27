@@ -1,22 +1,10 @@
 import { Injectable } from '@angular/core';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import {
-  faUser, faEnvelope, faLock, faArrowRight,
-  faTriangleExclamation, faShieldHalved, faBars,
-  faSearch, faClock, faHeart, faRandom, faGear,
-  faRightFromBracket, faUserShield, faChartLine,
-  faLightbulb, faTv
-} from '@fortawesome/free-solid-svg-icons';
+import { APP_ICONS } from '../../config/app.icon';
 
 @Injectable({ providedIn: 'root' })
 export class IconService {
   constructor(private library: FaIconLibrary) {
-    library.addIcons(
-      faUser, faEnvelope, faLock, faArrowRight,
-      faTriangleExclamation, faShieldHalved, faBars,
-      faSearch, faClock, faHeart, faRandom, faGear,
-      faRightFromBracket, faUserShield, faChartLine,
-      faLightbulb, faTv
-    );
+    library.addIcons(...APP_ICONS);
   }
 }
