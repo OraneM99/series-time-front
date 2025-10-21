@@ -1,0 +1,66 @@
+.navbar-transparent {
+    background: transparent;
+    padding: 1rem 2rem;
+    transition: all 0.4s ease;
+}
+
+.navbar .nav-link {
+    color: var(--text-primary);
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.navbar .nav-link.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-accent {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+.btn-accent:hover {
+    background-color: var(--accent-dark);
+    color: #fff;
+}
+
+.btn-outline-accent {
+    border: 2px solid var(--accent);
+    color: var(--accent);
+}
+
+.btn-outline-accent:hover {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+/* Style pour la photo de profil */
+.profile-picture {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+}
+
+.dropdown-menu {
+    background-color: var(--bg-secondary, #1a1a1a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+.dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+}
