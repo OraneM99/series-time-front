@@ -1,74 +1,36 @@
 import api from './api';
 
 export const authService = {
-    /**
-     * Inscription
-     */
-    async register(userData) {
-        const response = await api.post('/register', {
-            username: userData.username,
-            email: userData.email,
-            password: userData.password
+
+    async login(credentials) {
+        const response = await api.post('/login', {
+            email: credentials.email,
+            password: credentials.password
         });
+
+        if (response.data.token) {
+            localStorage.setItem('auth_token', response.data.token);
+            api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        }
+
         return response.data;
     },
 
-    /**
-     * Connexion
-     */
-    async login(credentials) {
-        try {
-            console.log('🔍 Credentials:', credentials);
-
-            const response = await api.post('/login', {
-                email: credentials.email || credentials.username,
-                password: credentials.password
-            });
-
-            if (response.data.token) {
-                localStorage.setItem('auth_token', response.data.token);
-                localStorage.setItem('refresh_token', response.data.refresh_token || '');
-            }
-
-            return response.data;
-        } catch (error) {
-            console.error('❌ Erreur login:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Déconnexion
-     */
     async logout() {
         try {
-            await api.post('/logout');
-        } catch (error) {
-            console.error('Erreur logout:', error);
+            await api.post('/logout').catch(() => {});
         } finally {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
+            delete api.defaults.headers.common['Authorization'];
         }
     },
 
-    /**
-     * Récupérer les infos utilisateur
-     */
     async getMe() {
-        const response = await api.get('/me');
-        return response.data;
+        const response = await api.get('/api/profile');
+        return response.data.user;
     },
 
-    /**
-     * Vérifier si l'utilisateur est connecté
-     */
-    isAuthenticated() {
-        return !!localStorage.getItem('auth_token');
-    },
-
-    /**
-     * Récupérer le token JWT
-     */
     getToken() {
         return localStorage.getItem('auth_token');
     }

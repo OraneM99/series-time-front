@@ -11,20 +11,15 @@ const api = axios.create({
     withCredentials: false
 });
 
-// Intercepteur pour ajouter le token JWT
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        console.error('Erreur requête:', error);
-        return Promise.reject(error);
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Envoi du token:', config.headers.Authorization);
     }
-);
+    return config;
+});
+
 
 // Intercepteur pour gérer les erreurs
 api.interceptors.response.use(

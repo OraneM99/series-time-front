@@ -4,14 +4,14 @@ import { authService } from '@/services/authService';
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
-        token: localStorage.getItem('auth_token'),
+        token: authService.getToken(),
         loading: false,
-        error: null
+        error: null,
     }),
 
     getters: {
         isAuthenticated: (state) => !!state.token,
-        currentUser: (state) => state.user
+        currentUser: (state) => state.user,
     },
 
     actions: {
@@ -22,11 +22,11 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const data = await authService.login(credentials);
                 this.token = data.token;
-                await this.fetchUser(); // Récupérer les infos utilisateur après login
+                await this.fetchUser();
                 return data;
-            } catch (error) {
-                this.error = error.response?.data?.error || 'Erreur de connexion';
-                throw error;
+            } catch (err) {
+                this.error = err.response?.data?.error || 'Erreur de connexion';
+                throw err;
             } finally {
                 this.loading = false;
             }
@@ -34,12 +34,11 @@ export const useAuthStore = defineStore('auth', {
 
         async fetchUser() {
             if (!this.token) return;
-
             try {
                 this.user = await authService.getMe();
-            } catch (error) {
-                console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-                this.logout();
+            } catch (err) {
+                console.error('Erreur fetchUser:', err);
+                await this.logout();
             }
         },
 
@@ -51,6 +50,9 @@ export const useAuthStore = defineStore('auth', {
 
         async initAuth() {
             if (this.token) {
+                // ajoute le token à Axios si existant
+                this.user = null;
+                api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
                 await this.fetchUser();
             }
         }
