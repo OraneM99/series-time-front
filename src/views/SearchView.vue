@@ -69,8 +69,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { serieService } from '@/services/serieService';
-import SerieCard from '@/components/SerieCard.vue';
+import { serieService } from '@/services/serieService.js';
+import SerieCard from '@/views/components/SerieCard.vue';
 
 const route = useRoute();
 const router = useRouter();

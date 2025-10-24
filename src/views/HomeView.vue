@@ -70,11 +70,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { serieService } from '@/services/serieService'
 import { trendingScheduler } from '@/services/trendingScheduler'
 
-import HeroCarousel from '@/components/HeroCarousel.vue'
-import SerieCard from '@/components/SerieCard.vue'
+import HeroCarousel from '@/views/components/HeroCarousel.vue'
+import SerieCard from '@/views/components/SerieCard.vue'
 
 import '@/assets/styles/home.css'
-import Navbar from "@/components/Navbar.vue";
+import Navbar from "@/views/components/Navbar.vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const popular = ref([])
 const topRated = ref([])

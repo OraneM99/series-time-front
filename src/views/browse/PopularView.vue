@@ -60,8 +60,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { serieService } from '@/services/serieService';
-import SerieCard from '@/components/SerieCard.vue';
+import { serieService } from '@/services/serieService.js';
+import SerieCard from '@/views/components/SerieCard.vue';
 
 const series = ref([]);
 const loading = ref(true);

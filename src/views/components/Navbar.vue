@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth.js';
 import { useRouter } from 'vue-router';
 
 import '@/assets/styles/components/navbar.css';

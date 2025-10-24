@@ -31,24 +31,31 @@
                   <small>{{ error }}</small>
                 </div>
 
+                <!-- Messages de succès -->
+                <div v-if="successMessage" class="alert alert-success d-flex align-items-start border-0 mb-4">
+                  <font-awesome-icon icon="check-circle" class="me-2 alert-icon" />
+                  <small>{{ successMessage }}</small>
+                </div>
+
                 <!-- Formulaire -->
                 <form @submit.prevent="handleLogin">
-                  <!-- Username -->
+                  <!-- Email ou Username -->
                   <div class="mb-3">
-                    <label for="inputUsername" class="form-label text-light small fw-medium">
-                      Nom d'utilisateur
+                    <label for="inputEmail" class="form-label text-light small fw-medium">
+                      Email ou nom d'utilisateur
                     </label>
                     <div class="input-icon">
                       <font-awesome-icon icon="user" class="input-icon-left" />
                       <input
-                          v-model="form.username"
+                          v-model="form.email"
                           type="text"
-                          id="inputUsername"
+                          id="inputEmail"
                           class="form-control custom-form-control ps-5"
-                          placeholder="Votre nom d'utilisateur"
+                          placeholder="Votre email ou username"
                           autocomplete="username"
                           required
                           autofocus
+                          :disabled="loading"
                       >
                     </div>
                   </div>
@@ -68,11 +75,13 @@
                           placeholder="••••••••••"
                           autocomplete="current-password"
                           required
+                          :disabled="loading"
                       >
                       <button
                           type="button"
                           class="password-toggle"
                           @click="showPassword = !showPassword"
+                          :disabled="loading"
                       >
                         <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
                       </button>
@@ -87,14 +96,15 @@
                           type="checkbox"
                           id="remember_me"
                           class="form-check-input custom-form-check"
+                          :disabled="loading"
                       >
                       <label for="remember_me" class="form-check-label text-light small">
                         Se souvenir de moi
                       </label>
                     </div>
-                    <a href="#" class="text-decoration-none small text-primary">
+                    <router-link to="/forgot-password" class="text-decoration-none small text-primary">
                       Mot de passe oublié ?
-                    </a>
+                    </router-link>
                   </div>
 
                   <!-- Bouton connexion -->
@@ -137,41 +147,61 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-
-// Importer le CSS
-import '@/assets/styles/auth.css';
+import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
 const form = ref({
-  username: '',
+  email: '',
   password: ''
 });
 
 const showPassword = ref(false);
 const rememberMe = ref(false);
 const loading = ref(false);
-const error = ref(null);
+const successMessage = ref(null);
 
+// Erreur provenant du store
+const error = computed(() => authStore.error);
+
+// Gestion de la soumission du formulaire
 const handleLogin = async () => {
   loading.value = true;
-  error.value = null;
+  authStore.clearError();
+  successMessage.value = null;
 
   try {
-    await authStore.login(form.value);
+    await authStore.login({
+      email: form.value.email,
+      password: form.value.password
+    });
 
-    // Rediriger vers la page demandée ou l'accueil
-    const redirect = route.query.redirect || '/browse';
-    router.push(redirect);
+    successMessage.value = 'Connexion réussie ! Redirection...';
+
+    // Redirection après un court délai
+    setTimeout(() => {
+      const redirect = route.query.redirect || '/browse';
+      router.push(redirect);
+    }, 500);
+
   } catch (err) {
-    error.value = authStore.error || 'Identifiants incorrects';
+    // L'erreur est déjà gérée par le store
+    console.error('Erreur de connexion:', err);
   } finally {
     loading.value = false;
   }
 };
+
+// Message de succès depuis query params (ex: après inscription)
+if (route.query.registered) {
+  successMessage.value = 'Inscription réussie ! Connectez-vous maintenant.';
+}
 </script>
+
+<style scoped>
+@import '@/assets/styles/auth.css';
+</style>

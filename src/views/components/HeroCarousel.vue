@@ -126,8 +126,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { serieService } from '@/services/serieService';
-import { useFavoriteStore } from '@/stores/favorite';
+import { serieService } from '@/services/serieService.js';
+import { useFavoriteStore } from '@/stores/favorite.js';
 
 const router = useRouter();
 const favoriteStore = useFavoriteStore();

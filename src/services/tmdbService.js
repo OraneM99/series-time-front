@@ -1,5 +1,5 @@
 import api from './api';
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/api-config.js';
 
 export const tmdbService = {
     /**

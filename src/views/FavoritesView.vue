@@ -86,7 +86,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite';
-import SerieCard from '@/components/SerieCard.vue';
+import SerieCard from '@/views/components/SerieCard.vue';
 
 const favoriteStore = useFavoriteStore();
 

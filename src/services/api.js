@@ -1,46 +1,56 @@
 import axios from 'axios';
-import { API_CONFIG } from '@/config/api';
 
+// Configuration de base
 const api = axios.create({
-    baseURL: API_CONFIG.baseURL,
-    timeout: API_CONFIG.timeout || 10000,
+    baseURL: import.meta.env.API_URL || 'http://localhost:8000',
+    timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-    },
-    withCredentials: false
-});
-
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log('🔑 Envoi du token:', config.headers.Authorization);
     }
-    return config;
 });
 
+// Intercepteur pour ajouter le token à chaque requête
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
-// Intercepteur pour gérer les erreurs
+// Intercepteur pour gérer les erreurs de réponse
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Token expiré ou invalide
-        if (error.response?.status === 401) {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('refresh_token');
-
-            // Éviter la redirection si on est déjà sur la page de login
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
+        if (error.response) {
+            // Gestion des erreurs HTTP spécifiques
+            switch (error.response.status) {
+                case 401:
+                    // Token invalide ou expiré
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/login';
+                    break;
+                case 403:
+                    console.error('Accès interdit');
+                    break;
+                case 404:
+                    console.error('Ressource non trouvée');
+                    break;
+                case 500:
+                    console.error('Erreur serveur');
+                    break;
             }
+        } else if (error.request) {
+            // Erreur réseau
+            console.error('Erreur réseau, serveur injoignable');
         }
-
-        // Erreur serveur
-        if (error.response?.status >= 500) {
-            console.error('Erreur serveur:', error.response.data);
-        }
-
         return Promise.reject(error);
     }
 );

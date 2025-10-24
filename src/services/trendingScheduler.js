@@ -1,132 +1,103 @@
-import { serieService } from './serieService';
+import api from './api';
+import { authService } from './authService';
 
 class TrendingScheduler {
     constructor() {
-        this.updateInterval = null;
-        this.listeners = new Set();
-        this.lastUpdate = null;
+        this.intervalId = null;
+        this.isRunning = false;
+        this.updateInterval = 5 * 60 * 1000; // 5 minutes par défaut
     }
 
     /**
-     * Démarrer le scheduler (mise à jour toutes les 24h)
+     * Démarre le scheduler
      */
-    start() {
-        // Vérifier immédiatement si une mise à jour est nécessaire
-        this.checkAndUpdate();
+    start(intervalMinutes = 5) {
+        // Empêcher les démarrages multiples
+        if (this.isRunning) {
+            console.log('⏰ Scheduler déjà en cours');
+            return;
+        }
 
-        // Vérifier toutes les heures si une mise à jour est nécessaire
-        this.updateInterval = setInterval(() => {
-            this.checkAndUpdate();
-        }, 3600000); // 1 heure en ms
+        this.updateInterval = intervalMinutes * 60 * 1000;
+        this.isRunning = true;
 
-        console.log('📅 Trending Scheduler démarré');
+        console.log(`⏰ Démarrage du scheduler (intervalle: ${intervalMinutes} minutes)`);
+
+        // Première mise à jour immédiate (si authentifié)
+        this.updateTrending();
+
+        // Puis mise à jour périodique
+        this.intervalId = setInterval(() => {
+            this.updateTrending();
+        }, this.updateInterval);
     }
 
     /**
-     * Arrêter le scheduler
+     * Arrête le scheduler
      */
     stop() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
-            console.log('📅 Trending Scheduler arrêté');
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+            this.isRunning = false;
+            console.log('⏰ Scheduler arrêté');
         }
     }
 
     /**
-     * Vérifier si une mise à jour est nécessaire
-     */
-    async checkAndUpdate() {
-        const lastUpdateTime = localStorage.getItem('trending_last_update');
-        const now = Date.now();
-
-        // Si pas de dernière mise à jour ou si plus de 24h
-        if (!lastUpdateTime || now - parseInt(lastUpdateTime) > 86400000) {
-            console.log('🔄 Mise à jour des tendances...');
-            await this.updateTrending();
-        }
-    }
-
-    /**
-     * Forcer une mise à jour des tendances
+     * Met à jour les tendances (seulement si authentifié)
      */
     async updateTrending() {
+        // Vérification de l'authentification AVANT d'appeler l'API
+        if (!authService.isAuthenticated()) {
+            console.log('⏸️ Mise à jour des tendances ignorée : utilisateur non authentifié');
+            return;
+        }
+
         try {
-            const response = await serieService.getTrending(1, 10);
+            console.log('🔄 Mise à jour des tendances...');
 
-            // Sauvegarder les données en cache
-            localStorage.setItem('trending_cache', JSON.stringify(response.data));
-            localStorage.setItem('trending_last_update', Date.now().toString());
+            const response = await api.post('/api/trending/update');
 
-            this.lastUpdate = new Date();
-
-            // Notifier tous les listeners
-            this.notifyListeners(response.data);
-
-            console.log('✅ Tendances mises à jour avec succès');
-            return response.data;
+            if (response.data.success) {
+                console.log('✅ Tendances mises à jour avec succès');
+            }
         } catch (error) {
-            console.error('❌ Erreur mise à jour tendances:', error);
-            throw error;
+            // Gestion des erreurs d'authentification
+            if (error.response?.status === 401) {
+                console.warn('⚠️ Token expiré - arrêt du scheduler');
+                this.stop();
+                authService.clearAuth();
+                return;
+            }
+
+            // Autres erreurs (ne pas arrêter le scheduler)
+            console.error('❌ Erreur mise à jour tendances:', error.message);
         }
     }
 
     /**
-     * Récupérer les tendances (depuis le cache si disponible)
+     * Vérifie si le scheduler est actif
      */
-    getTrending() {
-        const cached = localStorage.getItem('trending_cache');
-        if (cached) {
-            return JSON.parse(cached);
+    isActive() {
+        return this.isRunning;
+    }
+
+    /**
+     * Change l'intervalle de mise à jour
+     */
+    setInterval(minutes) {
+        const wasRunning = this.isRunning;
+
+        if (wasRunning) {
+            this.stop();
         }
-        return [];
-    }
 
-    /**
-     * Ajouter un listener pour les mises à jour
-     */
-    addListener(callback) {
-        this.listeners.add(callback);
-
-        // Retourner une fonction pour se désabonner
-        return () => {
-            this.listeners.delete(callback);
-        };
-    }
-
-    /**
-     * Notifier tous les listeners
-     */
-    notifyListeners(data) {
-        this.listeners.forEach(callback => {
-            callback(data);
-        });
-    }
-
-    /**
-     * Obtenir la date de dernière mise à jour
-     */
-    getLastUpdateDate() {
-        const timestamp = localStorage.getItem('trending_last_update');
-        if (timestamp) {
-            return new Date(parseInt(timestamp));
+        if (wasRunning) {
+            this.start(minutes);
         }
-        return null;
-    }
-
-    /**
-     * Temps avant la prochaine mise à jour (en ms)
-     */
-    getTimeUntilNextUpdate() {
-        const lastUpdate = this.getLastUpdateDate();
-        if (!lastUpdate) return 0;
-
-        const nextUpdate = new Date(lastUpdate.getTime() + 86400000); // +24h
-        const now = new Date();
-
-        return Math.max(0, nextUpdate - now);
     }
 }
 
-// Instance singleton
+// Instance unique (singleton)
 export const trendingScheduler = new TrendingScheduler();

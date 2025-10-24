@@ -1,13 +1,13 @@
 <template>
-  <div class="top-rated-view">
+  <div class="trending-view">
     <div class="container my-4">
       <!-- Header -->
       <div class="page-header mb-4">
         <h2>
-          <i class="bi bi-star-fill text-warning"></i>
-          Meilleures séries
+          <i class="bi bi-fire text-danger"></i>
+          Séries tendances
         </h2>
-        <p class="text-muted">Les séries les mieux notées de tous les temps</p>
+        <p class="text-muted">Les séries les plus populaires cette semaine</p>
       </div>
 
       <!-- Loading -->
@@ -25,17 +25,11 @@
       <!-- Grid -->
       <div v-else-if="series.length > 0" class="row g-3">
         <div
-            v-for="(serie, index) in series"
+            v-for="serie in series"
             :key="serie.id || serie.tmdb_id"
             class="col-6 col-md-4 col-lg-2"
         >
-          <div class="serie-wrapper">
-            <!-- Ranking badge -->
-            <div class="ranking-badge">
-              #{{ index + 1 }}
-            </div>
-            <SerieCard :serie="serie" />
-          </div>
+          <SerieCard :serie="serie" />
         </div>
       </div>
 
@@ -66,8 +60,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { serieService } from '@/services/serieService';
-import SerieCard from '@/components/SerieCard.vue';
+import { serieService } from '@/services/serieService.js';
+import SerieCard from '@/views/components/SerieCard.vue';
 
 const series = ref([]);
 const loading = ref(true);
@@ -85,7 +79,7 @@ const loadSeries = async (pageNum = 1) => {
   error.value = null;
 
   try {
-    const response = await serieService.getTopRated(pageNum, 20);
+    const response = await serieService.getTrending(pageNum, 20);
 
     if (pageNum === 1) {
       series.value = response.data || [];
@@ -94,7 +88,7 @@ const loadSeries = async (pageNum = 1) => {
     }
   } catch (err) {
     error.value = 'Erreur lors du chargement des séries';
-    console.error('Erreur top rated:', err);
+    console.error('Erreur trending:', err);
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -115,28 +109,5 @@ onMounted(() => {
 .page-header {
   border-bottom: 2px solid #dee2e6;
   padding-bottom: 1rem;
-}
-
-.serie-wrapper {
-  position: relative;
-}
-
-.ranking-badge {
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.9rem;
-  z-index: 10;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  border: 3px solid white;
 }
 </style>

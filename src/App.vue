@@ -36,7 +36,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import Navbar from "@/components/Navbar.vue";
+import Navbar from "@/views/components/Navbar.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();

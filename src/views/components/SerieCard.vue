@@ -39,8 +39,8 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useFavoriteStore } from '@/stores/favorite';
-import { serieService } from '@/services/serieService';
+import { useFavoriteStore } from '@/stores/favorite.js';
+import { serieService } from '@/services/serieService.js';
 
 const props = defineProps({
   serie: {

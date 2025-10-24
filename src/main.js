@@ -3,66 +3,58 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-// Styles globaux
-import '@/assets/styles/global.css'
+// Configuration
+import { setupPlugins } from '@/config/plugin-config'
+import { setupStyles } from '@/config/styles-config'
 
-// Bootstrap
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+// Styles
+setupStyles()
 
-// FontAwesome
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import {
-    faHeart, faSearch, faFire, faStar, faChartLine, faHome, faFilm,
-    faPlay, faPlus, faTimes, faUser, faSignOutAlt, faCog, faArrowLeft,
-    faArrowRight, faSpinner, faLock, faEnvelope, faEye, faEyeSlash,
-    faSignInAlt, faUserPlus, faCheckCircle, faExclamationCircle,
-    faExclamationTriangle, faShieldAlt, faChevronLeft, faChevronRight,
-    faClock, faInfoCircle, faUserCircle
-} from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
-
-library.add(
-    faHeart, faHeartRegular, faSearch, faFire, faStar, faChartLine,
-    faHome, faFilm, faPlay, faPlus, faTimes, faUser, faSignOutAlt,
-    faCog, faArrowLeft, faArrowRight, faSpinner, faLock, faEnvelope,
-    faEye, faEyeSlash, faSignInAlt, faUserPlus, faCheckCircle,
-    faExclamationCircle, faExclamationTriangle, faShieldAlt,
-    faChevronLeft, faChevronRight, faClock, faInfoCircle, faUserCircle
-)
-
+// Application
 const app = createApp(App)
-app.component('font-awesome-icon', FontAwesomeIcon)
-
-// Plugins
 const pinia = createPinia()
+
 app.use(pinia)
 app.use(router)
+setupPlugins(app)
 
-// Auth
+// Services (importés APRÈS Pinia)
 import { useAuthStore } from './stores/auth'
+import { authService } from './services/authService'
 import { trendingScheduler } from './services/trendingScheduler'
 
+/**
+ * Initialisation de l'application
+ */
 async function initApp() {
-    const authStore = useAuthStore()
-
     try {
-        await authStore.initAuth()
-        console.log('✅ Auth initialisée:', {
-            isAuthenticated: authStore.isAuthenticated,
-            user: authStore.currentUser
-        })
-    } catch (error) {
-        console.error('❌ Erreur init auth:', error)
-    } finally {
-        // Lancer le scheduler après l'auth
+        console.log('🔧 Initialisation...')
+
+        // Auth
+        authService.initAuth()
+        const authStore = useAuthStore()
+
+        if (authStore.token) {
+            try {
+                await authStore.checkAuth()
+                console.log('✅ Authentifié:', authStore.currentUser?.username)
+            } catch {
+                console.warn('⚠️ Token invalide')
+                await authStore.logout()
+            }
+        }
+
+        // Scheduler
         trendingScheduler.start()
 
-        // Monter UNE SEULE FOIS l’app
+        // Mount
         app.mount('#app')
-        console.log('🚀 App montée')
+        console.log('🚀 Application prête')
+
+    } catch (error) {
+        console.error('❌ Erreur:', error)
+        app.mount('#app')
     }
 }
 
-initApp().catch((err) => console.error('Erreur initApp:', err));
+initApp()

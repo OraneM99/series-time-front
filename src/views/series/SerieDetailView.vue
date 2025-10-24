@@ -181,9 +181,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { serieService } from '@/services/serieService';
-import { useFavoriteStore } from '@/stores/favorite';
-import SerieCard from '@/components/SerieCard.vue';
+import { serieService } from '@/services/serieService.js';
+import { useFavoriteStore } from '@/stores/favorite.js';
+import SerieCard from '@/views/components/SerieCard.vue';
 
 const route = useRoute();
 const favoriteStore = useFavoriteStore();
