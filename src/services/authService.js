@@ -5,22 +5,19 @@ export const authService = {
      * Connexion utilisateur
      */
     async login(credentials) {
-        // Validation côté client
         if (!credentials.email || !credentials.password) {
             throw new Error('Email et mot de passe requis');
         }
 
         try {
-            const response = await api.post('/api/auth/login', {
+            const response = await api.post('auth/login', {
                 email: credentials.email,
                 password: credentials.password
             });
 
             if (response.data.success && response.data.token) {
-                // Stockage sécurisé du token
                 this.setToken(response.data.token);
 
-                // Stockage des infos utilisateur
                 if (response.data.user) {
                     this.setUser(response.data.user);
                 }
@@ -42,7 +39,6 @@ export const authService = {
      * Inscription utilisateur
      */
     async register(userData) {
-        // Validation basique
         if (!userData.email || !userData.password || !userData.username) {
             throw new Error('Tous les champs sont requis');
         }
@@ -55,7 +51,6 @@ export const authService = {
             });
 
             if (response.data.success && response.data.token) {
-                // Auto-login après inscription
                 this.setToken(response.data.token);
                 this.setUser(response.data.user);
             }
@@ -74,14 +69,11 @@ export const authService = {
      */
     async logout() {
         try {
-            // Tenter la déconnexion côté serveur si authentifié
             if (this.isAuthenticated()) {
                 await api.post('/api/auth/logout').catch(() => {
-                    // Ignore les erreurs de déconnexion côté serveur
                 });
             }
         } finally {
-            // Nettoyage local (toujours exécuté)
             this.clearAuth();
         }
     },
@@ -94,14 +86,12 @@ export const authService = {
             const response = await api.get('/api/auth/profile');
 
             if (response.data.success && response.data.user) {
-                // Mise à jour du localStorage
                 this.setUser(response.data.user);
                 return response.data.user;
             }
 
             throw new Error('Impossible de récupérer le profil');
         } catch (error) {
-            // Si le token est invalide, déconnecter l'utilisateur
             if (error.response?.status === 401) {
                 this.clearAuth();
             }
@@ -121,7 +111,6 @@ export const authService = {
             const response = await api.get('/api/auth/verify');
             return response.data.valid === true;
         } catch (error) {
-            // Si erreur 401, le token est invalide
             if (error.response?.status === 401) {
                 this.clearAuth();
             }

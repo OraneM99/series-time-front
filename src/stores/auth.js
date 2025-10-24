@@ -1,6 +1,7 @@
-import { defineStore } from 'pinia';
-import { authService } from "@/services/authService.js";
-import { trendingScheduler } from '@/services/trendingScheduler';
+import { defineStore } from 'pinia'
+import { authService } from '@/services/authService.js'
+import { trendingScheduler } from '@/services/trendingScheduler'
+import { useToast } from '@/composables/useToast'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -16,8 +17,8 @@ export const useAuthStore = defineStore('auth', {
         isLoggedIn: (state) => state.isAuthenticated,
         isAdmin: (state) => state.user?.roles?.includes('ROLE_ADMIN') ?? false,
         userInitials: (state) => {
-            if (!state.user?.username) return '?';
-            return state.user.username.substring(0, 2).toUpperCase();
+            if (!state.user?.username) return '?'
+            return state.user.username.substring(0, 2).toUpperCase()
         }
     },
 
@@ -26,111 +27,91 @@ export const useAuthStore = defineStore('auth', {
          * Connexion
          */
         async login(credentials) {
-            this.loading = true;
-            this.error = null;
-
-            console.log('🔐 [AUTH STORE] Début connexion');
-            console.log('📧 Email:', credentials.email);
+            const toast = useToast()
+            this.loading = true
+            this.error = null
 
             try {
-                // Appel du service
-                const response = await authService.login(credentials);
+                const response = await authService.login(credentials)
 
-                console.log('✅ [AUTH STORE] Réponse reçue:', response);
-
-                // Vérifier la structure de la réponse
-                if (!response) {
-                    console.error('❌ [AUTH STORE] Réponse vide');
-                    throw new Error('Réponse serveur vide');
+                // Vérifications
+                if (!response?.success) {
+                    throw new Error(response?.message || 'Échec de la connexion')
                 }
-
-                if (!response.success) {
-                    console.error('❌ [AUTH STORE] Échec:', response.message);
-                    throw new Error(response.message || 'Échec de la connexion');
-                }
-
                 if (!response.token) {
-                    console.error('❌ [AUTH STORE] Token manquant');
-                    throw new Error('Token manquant dans la réponse');
+                    throw new Error('Token manquant dans la réponse')
                 }
-
                 if (!response.user) {
-                    console.error('❌ [AUTH STORE] User manquant');
-                    throw new Error('Données utilisateur manquantes');
+                    throw new Error('Données utilisateur manquantes')
                 }
 
                 // Mise à jour du state
-                this.user = response.user;
-                this.token = response.token;
-                this.isAuthenticated = true;
+                this.user = response.user
+                this.token = response.token
+                this.isAuthenticated = true
 
-                console.log('✅ [AUTH STORE] State mis à jour');
-                console.log('👤 User:', this.user);
-                console.log('🔑 Token présent:', !!this.token);
-                console.log('✅ isAuthenticated:', this.isAuthenticated);
+                // Toast de succès
+                toast.success(`Bienvenue ${this.user.username} ! 👋`)
 
-                // Démarrer le scheduler seulement si authentifié
+                // Démarrer le scheduler
                 if (this.isAuthenticated) {
-                    console.log('⏰ Démarrage du scheduler');
-                    trendingScheduler.start(5);
+                    trendingScheduler.start(5)
                 }
 
-                return response;
+                return response
 
             } catch (error) {
-                console.error('❌ [AUTH STORE] Erreur complète:', error);
+                console.error('❌ [AUTH] Erreur de connexion:', error)
 
-                // Gestion détaillée des erreurs
+                // Gestion des erreurs avec toasts
                 if (error.response) {
-                    console.error('📡 Status HTTP:', error.response.status);
-                    console.error('📡 Data:', error.response.data);
-
-                    const status = error.response.status;
-                    const serverMessage = error.response.data?.message;
+                    const status = error.response.status
+                    const serverMessage = error.response.data?.message
 
                     switch (status) {
                         case 400:
-                            this.error = 'Données de connexion invalides';
-                            break;
+                            this.error = 'Données de connexion invalides'
+                            toast.error('Données de connexion invalides')
+                            break
                         case 401:
-                            this.error = 'Email ou mot de passe incorrect';
-                            break;
+                            this.error = 'Email ou mot de passe incorrect'
+                            toast.error('Email ou mot de passe incorrect')
+                            break
                         case 403:
-                            this.error = 'Accès refusé';
-                            break;
-                        case 404:
-                            this.error = 'Service non disponible';
-                            break;
+                            this.error = serverMessage || 'Accès refusé'
+                            toast.error(serverMessage || 'Accès refusé', { duration: 6000 })
+                            break
                         case 429:
-                            this.error = 'Trop de tentatives. Réessayez plus tard';
-                            break;
+                            this.error = 'Trop de tentatives'
+                            toast.warning('Trop de tentatives. Réessayez dans quelques minutes')
+                            break
                         case 500:
                         case 502:
                         case 503:
-                            this.error = 'Erreur serveur. Veuillez réessayer';
-                            break;
+                            this.error = 'Erreur serveur'
+                            toast.error('Erreur serveur. Veuillez réessayer')
+                            break
                         default:
-                            this.error = serverMessage || 'Erreur de connexion';
+                            this.error = serverMessage || 'Erreur de connexion'
+                            toast.error(serverMessage || 'Erreur de connexion')
                     }
                 } else if (error.request) {
-                    console.error('📡 Aucune réponse du serveur');
-                    console.error('Request:', error.request);
-                    this.error = 'Impossible de contacter le serveur';
+                    this.error = 'Impossible de contacter le serveur'
+                    toast.error('Impossible de contacter le serveur')
                 } else {
-                    console.error('⚠️ Erreur:', error.message);
-                    this.error = error.message || 'Une erreur est survenue';
+                    this.error = error.message || 'Une erreur est survenue'
+                    toast.error(error.message || 'Une erreur est survenue')
                 }
 
                 // Nettoyer l'état
-                this.user = null;
-                this.token = null;
-                this.isAuthenticated = false;
+                this.user = null
+                this.token = null
+                this.isAuthenticated = false
 
-                throw error;
+                throw error
 
             } finally {
-                this.loading = false;
-                console.log('🏁 [AUTH STORE] Fin login, loading:', this.loading);
+                this.loading = false
             }
         },
 
@@ -138,59 +119,59 @@ export const useAuthStore = defineStore('auth', {
          * Inscription
          */
         async register(userData) {
-            this.loading = true;
-            this.error = null;
-
-            console.log('📝 [AUTH STORE] Début inscription');
+            const toast = useToast()
+            this.loading = true
+            this.error = null
 
             try {
-                // Validation côté client
+                // Validation
                 if (!userData.email || !userData.password || !userData.username) {
-                    throw new Error('Tous les champs sont requis');
+                    throw new Error('Tous les champs sont requis')
                 }
-
                 if (userData.password.length < 6) {
-                    throw new Error('Le mot de passe doit contenir au moins 6 caractères');
+                    throw new Error('Le mot de passe doit contenir au moins 6 caractères')
                 }
 
-                const response = await authService.register(userData);
+                const response = await authService.register(userData)
 
-                console.log('✅ [AUTH STORE] Inscription réussie:', response);
-
-                // Si inscription avec auto-login
+                // Auto-login si inscription réussie
                 if (response.success && response.token && response.user) {
-                    this.user = response.user;
-                    this.token = response.token;
-                    this.isAuthenticated = true;
+                    this.user = response.user
+                    this.token = response.token
+                    this.isAuthenticated = true
 
-                    // Démarrer le scheduler
-                    trendingScheduler.start(5);
+                    toast.success('Inscription réussie ! Bienvenue 🎉', { duration: 4000 })
+                    trendingScheduler.start(5)
                 }
 
-                return response;
+                return response
 
             } catch (error) {
-                console.error('❌ [AUTH STORE] Erreur inscription:', error);
+                console.error('❌ [AUTH] Erreur inscription:', error)
 
                 if (error.response) {
-                    const status = error.response.status;
-                    const serverMessage = error.response.data?.message;
+                    const status = error.response.status
+                    const serverMessage = error.response.data?.message
 
                     if (status === 409) {
-                        this.error = 'Cet email ou nom d\'utilisateur est déjà utilisé';
+                        this.error = 'Email ou nom d\'utilisateur déjà utilisé'
+                        toast.error('Cet email ou nom d\'utilisateur est déjà utilisé')
                     } else if (status === 400) {
-                        this.error = serverMessage || 'Données invalides';
+                        this.error = serverMessage || 'Données invalides'
+                        toast.error(serverMessage || 'Données invalides')
                     } else {
-                        this.error = serverMessage || 'Erreur lors de l\'inscription';
+                        this.error = serverMessage || 'Erreur lors de l\'inscription'
+                        toast.error(serverMessage || 'Erreur lors de l\'inscription')
                     }
                 } else {
-                    this.error = error.message || 'Une erreur est survenue';
+                    this.error = error.message || 'Une erreur est survenue'
+                    toast.error(error.message || 'Une erreur est survenue')
                 }
 
-                throw error;
+                throw error
 
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
 
@@ -198,25 +179,20 @@ export const useAuthStore = defineStore('auth', {
          * Déconnexion
          */
         async logout() {
-            console.log('👋 [AUTH STORE] Déconnexion');
+            const toast = useToast()
 
             try {
-                // Arrêter le scheduler
-                trendingScheduler.stop();
-
-                // Appeler le backend
-                await authService.logout();
+                trendingScheduler.stop()
+                await authService.logout()
+                toast.info('Déconnexion réussie. À bientôt ! 👋')
 
             } catch (error) {
-                console.error('⚠️ Erreur lors de la déconnexion:', error);
+                console.error('⚠️ Erreur déconnexion:', error)
             } finally {
-                // Toujours nettoyer le state
-                this.user = null;
-                this.token = null;
-                this.isAuthenticated = false;
-                this.error = null;
-
-                console.log('✅ [AUTH STORE] État nettoyé');
+                this.user = null
+                this.token = null
+                this.isAuthenticated = false
+                this.error = null
             }
         },
 
@@ -224,27 +200,30 @@ export const useAuthStore = defineStore('auth', {
          * Récupération du profil
          */
         async fetchUserProfile() {
-            this.loading = true;
-            console.log('👤 [AUTH STORE] Récupération du profil');
+            const toast = useToast()
+            this.loading = true
 
             try {
-                const user = await authService.getMe();
-                this.user = user;
-                this.isAuthenticated = true;
-
-                console.log('✅ [AUTH STORE] Profil récupéré:', user);
-                return user;
+                const user = await authService.getMe()
+                this.user = user
+                this.isAuthenticated = true
+                return user
 
             } catch (error) {
-                console.error('❌ [AUTH STORE] Erreur profil:', error);
-                this.error = error.message;
+                console.error('❌ [AUTH] Erreur profil:', error)
+                this.error = error.message
 
-                // Si échec (token invalide), déconnecter
-                await this.logout();
-                throw error;
+                if (error.response?.status === 401) {
+                    toast.warning('Session expirée. Veuillez vous reconnecter')
+                    await this.logout()
+                } else {
+                    toast.error('Impossible de récupérer le profil')
+                }
+
+                throw error
 
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
 
@@ -252,32 +231,25 @@ export const useAuthStore = defineStore('auth', {
          * Vérification du token au démarrage
          */
         async checkAuth() {
-            console.log('🔍 [AUTH STORE] Vérification auth...');
-            console.log('Token présent:', !!this.token);
-
             if (this.token) {
                 try {
-                    await this.fetchUserProfile();
+                    await this.fetchUserProfile()
 
-                    // Démarrer le scheduler si authentifié
                     if (this.isAuthenticated) {
-                        trendingScheduler.start(5);
+                        trendingScheduler.start(5)
                     }
                 } catch (error) {
-                    console.error('❌ Token invalide, déconnexion');
-                    await this.logout();
+                    console.error('❌ Token invalide')
+                    await this.logout()
                 }
-            } else {
-                console.log('ℹ️ Aucun token trouvé');
             }
         },
 
         /**
-         * Réinitialisation de l'erreur
+         * Effacer l'erreur
          */
         clearError() {
-            console.log('🧹 [AUTH STORE] Effacement erreur');
-            this.error = null;
+            this.error = null
         }
     }
-});
+})

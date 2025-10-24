@@ -4,14 +4,14 @@ import { authGuard, guestGuard } from './guards'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
-        // Routes publiques
+        // ROUTE PUBLIQUE - Page d'accueil
         {
             path: '/',
             name: 'home',
-            component: () => import('@/views/HomeView.vue')
+            component: () => import('@/views/HomeView.vue'),
         },
 
-        // Auth (accessibles uniquement si non connecté)
+        // AUTH - Accessibles uniquement si NON connecté
         {
             path: '/login',
             name: 'login',
@@ -23,26 +23,34 @@ const router = createRouter({
             path: '/register',
             name: 'register',
             component: () => import('@/views/auth/RegisterView.vue'),
+            meta: { requiresGuest: true },
             beforeEnter: guestGuard
         },
 
-        // Routes protégées (nécessitent authentification)
+        // ROUTES PROTÉGÉES - Nécessitent authentification
+        {
+            path: '/browse',
+            redirect: '/browse/trending'
+        },
         {
             path: '/browse/trending',
             name: 'trending',
             component: () => import('@/views/browse/TrendingView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard
         },
         {
             path: '/browse/popular',
             name: 'popular',
             component: () => import('@/views/browse/PopularView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard
         },
         {
             path: '/browse/top-rated',
             name: 'topRated',
             component: () => import('@/views/browse/TopRatedView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard
         },
 
@@ -51,12 +59,14 @@ const router = createRouter({
             path: '/series',
             name: 'series',
             component: () => import('@/views/series/SeriesView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard
         },
         {
             path: '/serie/:id',
             name: 'serie-detail',
             component: () => import('@/views/series/SerieDetailView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard,
             props: true
         },
@@ -66,6 +76,7 @@ const router = createRouter({
             path: '/profile',
             name: 'profile',
             component: () => import('@/views/ProfileView.vue'),
+            meta: { requiresAuth: true },
             beforeEnter: authGuard
         },
 
@@ -78,12 +89,11 @@ const router = createRouter({
     ]
 })
 
-// Guard global pour vérifier l'auth avant chaque navigation
+// Guard global pour logger les navigations en DEV
 router.beforeEach((to, from, next) => {
     if (import.meta.env.DEV) {
-        console.log('Navigation:', from.path, '→', to.path)
+        console.log('🚦 [ROUTER] Navigation:', from.path, '→', to.path)
     }
-
     next()
 })
 

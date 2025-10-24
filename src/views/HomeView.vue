@@ -1,6 +1,7 @@
 <template>
   <div class="home-view">
     <Navbar />
+
     <!-- Hero Carousel avec séries tendances -->
     <HeroCarousel />
 
@@ -12,8 +13,20 @@
             <font-awesome-icon icon="chart-line" class="me-2 text-accent" />
             Populaires
           </h2>
-          <router-link :to="{ name: 'popular' }" class="btn btn-outline-accent">
+          <router-link
+              v-if="isAuthenticated"
+              :to="{ name: 'popular' }"
+              class="btn btn-outline-accent"
+          >
             Voir tout
+            <font-awesome-icon icon="arrow-right" class="ms-2" />
+          </router-link>
+          <router-link
+              v-else
+              :to="{ name: 'login' }"
+              class="btn btn-outline-accent"
+          >
+            Se connecter pour voir plus
             <font-awesome-icon icon="arrow-right" class="ms-2" />
           </router-link>
         </div>
@@ -21,6 +34,15 @@
         <!-- Loading -->
         <div v-if="loading" class="text-center py-5">
           <font-awesome-icon icon="spinner" spin size="3x" class="text-accent" />
+        </div>
+
+        <!-- Erreur -->
+        <div v-else-if="error" class="alert alert-warning text-center">
+          <font-awesome-icon icon="exclamation-triangle" class="me-2" />
+          {{ error }}
+          <router-link :to="{ name: 'login' }" class="btn btn-sm btn-primary ms-3">
+            Se connecter
+          </router-link>
         </div>
 
         <!-- Séries populaires -->
@@ -44,14 +66,26 @@
             <font-awesome-icon icon="star" class="me-2 text-accent" />
             Meilleures séries
           </h2>
-          <router-link :to="{ name: 'top-rated' }" class="btn btn-outline-accent">
+          <router-link
+              v-if="isAuthenticated"
+              :to="{ name: 'topRated' }"
+              class="btn btn-outline-accent"
+          >
             Voir tout
+            <font-awesome-icon icon="arrow-right" class="ms-2" />
+          </router-link>
+          <router-link
+              v-else
+              :to="{ name: 'login' }"
+              class="btn btn-outline-accent"
+          >
+            Se connecter pour voir plus
             <font-awesome-icon icon="arrow-right" class="ms-2" />
           </router-link>
         </div>
 
         <!-- Séries top rated -->
-        <div v-if="!loading" class="row g-4">
+        <div v-if="!loading && !error" class="row g-4">
           <div
               v-for="serie in topRated"
               :key="serie.tmdb_id || serie.id"
@@ -62,20 +96,41 @@
         </div>
       </div>
     </section>
+
+    <!-- Call to Action pour utilisateurs non connectés -->
+    <section v-if="!isAuthenticated" class="cta-section py-5 text-center">
+      <div class="container">
+        <h2 class="mb-4">Rejoignez-nous pour découvrir plus de séries !</h2>
+        <div class="d-flex gap-3 justify-content-center">
+          <router-link :to="{ name: 'register' }" class="btn btn-primary btn-lg">
+            <font-awesome-icon icon="user-plus" class="me-2" />
+            Créer un compte
+          </router-link>
+          <router-link :to="{ name: 'login' }" class="btn btn-outline-accent btn-lg">
+            <font-awesome-icon icon="sign-in-alt" class="me-2" />
+            Se connecter
+          </router-link>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { serieService } from '@/services/serieService'
 import { trendingScheduler } from '@/services/trendingScheduler'
 
 import HeroCarousel from '@/views/components/HeroCarousel.vue'
 import SerieCard from '@/views/components/SerieCard.vue'
+import Navbar from "@/views/components/Navbar.vue"
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 
 import '@/assets/styles/home.css'
-import Navbar from "@/views/components/Navbar.vue";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 const popular = ref([])
 const topRated = ref([])
@@ -89,12 +144,22 @@ const loadHomeData = async () => {
   error.value = null
 
   try {
+    // Essayer de charger les données
+    // Si l'utilisateur n'est pas connecté, l'API peut retourner une erreur
     const data = await serieService.getHomeData()
     popular.value = data.popular || []
     topRated.value = data.top_rated || []
   } catch (err) {
-    error.value = 'Erreur lors du chargement des données'
     console.error('Erreur home:', err)
+
+    // Si erreur 401, c'est normal (utilisateur non connecté)
+    if (err.response?.status === 401) {
+      error.value = 'Connectez-vous pour voir toutes les séries'
+      // Charger des données publiques (si vous avez une API publique)
+      // ou afficher des données par défaut
+    } else {
+      error.value = 'Erreur lors du chargement des données'
+    }
   } finally {
     loading.value = false
   }
@@ -102,10 +167,14 @@ const loadHomeData = async () => {
 
 onMounted(async () => {
   await loadHomeData()
-  trendingScheduler.start()
-  unsubscribe = trendingScheduler.addListener((data) => {
-    console.log('📊 Nouvelles tendances reçues:', data.length, 'séries')
-  })
+
+  // Démarrer le scheduler seulement si authentifié
+  if (isAuthenticated.value) {
+    trendingScheduler.start()
+    unsubscribe = trendingScheduler.addListener((data) => {
+      console.log('📊 Nouvelles tendances reçues:', data.length, 'séries')
+    })
+  }
 })
 
 onUnmounted(() => {
@@ -154,10 +223,29 @@ onUnmounted(() => {
   margin-top: -5px;
 }
 
+/* Call to Action */
+.cta-section {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: white;
+}
+
+.cta-section h2 {
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* Réactivité */
 @media (max-width: 768px) {
   .section-title {
     font-size: 1.5rem;
+  }
+
+  .cta-section .d-flex {
+    flex-direction: column;
+  }
+
+  .cta-section .btn {
+    width: 100%;
   }
 }
 </style>

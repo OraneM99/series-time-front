@@ -1,29 +1,39 @@
-import axios from 'axios';
+import api from './api'
 
 export const serieService = {
-    getHomeData() {
-        return axios.get('/api/series/home').then(res => res.data);
-    },
-    getTrending() {
-        return axios.get('/api/series/trending').then(res => res.data);
-    },
-    getPopular() {
-        return axios.get('/api/series/popular').then(res => res.data);
-    },
-    getTopRated() {
-        return axios.get('/api/series/top-rated').then(res => res.data);
-    },
-    getSerieDetails(tmdbId) {
-        return axios.get(`/api/series/detail/${tmdbId}`).then(res => res.data);
-    },
-    searchSeries(query) {
-        return axios.get(`/api/series/search?q=${encodeURIComponent(query)}`).then(res => res.data);
+    async getHomeData() {
+        const response = await api.get('/home') // Route publique
+        return response.data
     },
 
-    // Fonction ajoutée pour générer l'URL des images
+    async getTrending(limit = 10) {
+        const response = await api.get('/series/trending', { params: { limit } })
+        return response.data
+    },
+
+    async getPopular(limit = 10) {
+        const response = await api.get('/series/popular', { params: { limit } })
+        return response.data
+    },
+
+    async getTopRated(limit = 10) {
+        const response = await api.get('/series/top-rated', { params: { limit } })
+        return response.data
+    },
+
+    async getSerieDetails(tmdbId) {
+        const response = await api.get(`/series/detail/${tmdbId}`)
+        return response.data
+    },
+
+    async searchSeries(query) {
+        const response = await api.get(`/series/search`, { params: { q: query } })
+        return response.data
+    },
+
     getImageUrl(path, size = 'w500') {
-        if (!path) return null;
-        if (path.startsWith('http')) return path;
-        return `https://image.tmdb.org/t/p/${size}${path}`;
+        if (!path) return null
+        if (path.startsWith('http')) return path
+        return `https://image.tmdb.org/t/p/${size}${path}`
     }
-};
+}
