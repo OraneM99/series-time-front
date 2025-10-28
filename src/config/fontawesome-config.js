@@ -93,8 +93,6 @@ export function setupFontAwesome() {
         ...statusIcons,
         ...miscIcons
     )
-
-    console.log('FontAwesome configuré avec', library.definitions.fas ? Object.keys(library.definitions.fas).length : 0, 'icônes')
 }
 
 export function addIcons(icons) {
